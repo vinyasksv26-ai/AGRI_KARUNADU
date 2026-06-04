@@ -1,16 +1,32 @@
 import streamlit as st
 import pandas as pd
 
-from sklearn.model_selection import train_test_split
+st.title("🌾 AGRI KARUNADU")
+
+# Load Dataset
+df = pd.read_csv("data_season.csv")
+
+# Show columns
+st.subheader("Dataset Columns")
+st.write(df.columns.tolist())
+
+# Display dataset
+st.subheader("Dataset Preview")
+st.dataframe(df.head())
+
+# Check if target column exists
+if "yeilds" not in df.columns:
+    st.error(
+        "Column 'yeilds' not found in dataset. Please check the column name shown above."
+    )
+    st.stop()
+
+# ML Part
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 
-# Load dataset
-df = pd.read_csv("data_season.csv")
-
-# Train model
 X = df.drop("yeilds", axis=1)
 y = df["yeilds"]
 
@@ -24,9 +40,11 @@ categorical_cols = [
 
 preprocessor = ColumnTransformer(
     transformers=[
-        ("cat",
-         OneHotEncoder(handle_unknown="ignore"),
-         categorical_cols)
+        (
+            "cat",
+            OneHotEncoder(handle_unknown="ignore"),
+            categorical_cols
+        )
     ],
     remainder="passthrough"
 )
@@ -41,7 +59,4 @@ model = Pipeline([
 
 model.fit(X, y)
 
-st.title("🌾 Crop Yield Prediction")
-
-st.write("Model trained successfully!")
-st.dataframe(df.head())
+st.success("Model trained successfully!")
