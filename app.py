@@ -6,15 +6,27 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 
-st.title("🌾 AGRI KARUNADU - Crop Yield Prediction")
+# Page Title
+st.set_page_config(page_title="AGRI KARUNADU", layout="wide")
 
-# Load dataset
+st.title("🌾 AGRI KARUNADU")
+st.subheader("Crop Yield Prediction System")
+
+# Load Dataset
 df = pd.read_csv("data_season.csv")
 
-# Train model
+# Remove missing values from categorical columns
+df = df.fillna("")
+
+# Show Dataset
+st.subheader("Dataset Preview")
+st.dataframe(df.head())
+
+# Features and Target
 X = df.drop("yeilds", axis=1)
 y = df["yeilds"]
 
+# Categorical Columns
 categorical_cols = [
     "Location",
     "Soil type",
@@ -23,13 +35,19 @@ categorical_cols = [
     "Season"
 ]
 
+# Preprocessing
 preprocessor = ColumnTransformer(
     transformers=[
-        ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols)
+        (
+            "cat",
+            OneHotEncoder(handle_unknown="ignore"),
+            categorical_cols
+        )
     ],
     remainder="passthrough"
 )
 
+# Model
 model = Pipeline([
     ("preprocessor", preprocessor),
     ("regressor", RandomForestRegressor(
@@ -38,17 +56,19 @@ model = Pipeline([
     ))
 ])
 
+# Train Model
 model.fit(X, y)
 
-st.success("Model trained successfully!")
+st.success("✅ Model Trained Successfully")
 
 st.header("Enter Crop Details")
 
+# Input Fields
 year = st.number_input("Year", value=2024)
 
 location = st.selectbox(
     "Location",
-    sorted(df["Location"].unique())
+    sorted(df["Location"].dropna().astype(str).unique())
 )
 
 area = st.number_input("Area", value=1000.0)
@@ -59,28 +79,29 @@ temperature = st.number_input("Temperature", value=25.0)
 
 soil = st.selectbox(
     "Soil Type",
-    sorted(df["Soil type"].unique())
+    sorted(df["Soil type"].dropna().astype(str).unique())
 )
 
 irrigation = st.selectbox(
     "Irrigation",
-    sorted(df["Irrigation"].unique())
+    sorted(df["Irrigation"].dropna().astype(str).unique())
 )
 
 humidity = st.number_input("Humidity", value=60.0)
 
 crop = st.selectbox(
     "Crop",
-    sorted(df["Crops"].unique())
+    sorted(df["Crops"].dropna().astype(str).unique())
 )
 
 price = st.number_input("Price", value=1000.0)
 
 season = st.selectbox(
     "Season",
-    sorted(df["Season"].unique())
+    sorted(df["Season"].dropna().astype(str).unique())
 )
 
+# Prediction Button
 if st.button("Predict Yield"):
 
     input_data = pd.DataFrame({
