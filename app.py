@@ -9,6 +9,8 @@ st.set_page_config(
 st.title("🌾 AGRI KARUNADU")
 st.subheader("AI Powered Crop Yield Prediction System")
 
+st.image("assets/logo.png", width=150)
+
 st.markdown("""
 ### Features
 
@@ -20,5 +22,5 @@ st.markdown("""
 
 📋 Dataset Explorer
 
-Use the sidebar to navigate between pages.
+Use the sidebar to navigate.
 """)
