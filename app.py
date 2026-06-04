@@ -1,51 +1,47 @@
 import streamlit as st
 import pandas as pd
-import joblib
 
-model = joblib.load("model.pkl")
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
 
-st.title("🌾 Crop Yield Prediction System")
+# Load dataset
+df = pd.read_csv("data_season.csv")
 
-year = st.number_input("Year", 2000, 2050, 2024)
+# Train model
+X = df.drop("yeilds", axis=1)
+y = df["yeilds"]
 
-location = st.text_input("Location")
+categorical_cols = [
+    "Location",
+    "Soil type",
+    "Irrigation",
+    "Crops",
+    "Season"
+]
 
-area = st.number_input("Area")
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("cat",
+         OneHotEncoder(handle_unknown="ignore"),
+         categorical_cols)
+    ],
+    remainder="passthrough"
+)
 
-rainfall = st.number_input("Rainfall")
+model = Pipeline([
+    ("preprocessor", preprocessor),
+    ("regressor", RandomForestRegressor(
+        n_estimators=100,
+        random_state=42
+    ))
+])
 
-temperature = st.number_input("Temperature")
+model.fit(X, y)
 
-soil = st.text_input("Soil Type")
+st.title("🌾 Crop Yield Prediction")
 
-irrigation = st.text_input("Irrigation")
-
-humidity = st.number_input("Humidity")
-
-crop = st.text_input("Crop")
-
-price = st.number_input("Price")
-
-season = st.text_input("Season")
-
-if st.button("Predict Yield"):
-
-    input_df = pd.DataFrame({
-        "Year":[year],
-        "Location":[location],
-        "Area":[area],
-        "Rainfall":[rainfall],
-        "Temperature":[temperature],
-        "Soil type":[soil],
-        "Irrigation":[irrigation],
-        "Humidity":[humidity],
-        "Crops":[crop],
-        "price":[price],
-        "Season":[season]
-    })
-
-    prediction = model.predict(input_df)
-
-    st.success(
-        f"Predicted Yield = {prediction[0]:.2f}"
-    )
+st.write("Model trained successfully!")
+st.dataframe(df.head())
